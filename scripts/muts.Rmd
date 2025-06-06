@@ -1,0 +1,108 @@
+---
+title: "CTC_Mut"
+output: html_document
+date: "2025-01-10"
+---
+
+```{r setup, include=FALSE}
+# Load necessary libraries
+library(dplyr)
+
+# Specify the folder containing CSV files
+input_folder <- "/Users/ankit/Downloads/output_sample12"
+
+# List all CSV files in the folder
+file_list <- list.files(path = input_folder, pattern = "*.csv", full.names = TRUE)
+
+# Initialize an empty dataframe to store results
+results <- data.frame(File = character(), Second_Row_Fraction = numeric(), stringsAsFactors = FALSE)
+
+# Loop through each file
+for (file_path in file_list) {
+  # Read the CSV file
+  ctc <- read.csv(file_path)
+  
+  # Initialize the count vector
+  count_vec <- integer()
+  for (i in 1:nrow(ctc)) {
+    count_vec <- c(count_vec, ctc[i, paste0(ctc$Alt_Base[i], '_Count')])
+  }
+  
+  # Add the alt_count and n_alleles columns
+  ctc$alt_count <- count_vec
+  ctc$n_alleles <- rowSums(ctc[, grepl('Count', colnames(ctc))] > 0)
+  
+  # Create the result table
+  result_table <- table(ctc$n_alleles, ctc$alt_count > 0)
+  
+  # Calculate the second row fraction
+  if ("1" %in% rownames(result_table) && "TRUE" %in% colnames(result_table)) {
+    second_row_fraction <- result_table["1", "TRUE"] / sum(result_table["1", ])
+  } else {
+    second_row_fraction <- NA  # Handle cases where "1" or "TRUE" is missing
+  }
+  
+  # Append the result to the results dataframe
+  results <- rbind(results, data.frame(File = basename(file_path), Second_Row_Fraction = second_row_fraction))
+}
+
+# Optionally, save the results to a CSV file
+write.csv(results, file = "/Users/ankit/Downloads/muts_output_sample12.csv", row.names = FALSE)
+```
+
+
+```{r setup, include=FALSE}
+# Directory containing CSV files
+input_dir <- '/Users/ankit/Downloads/output_Sample12'
+
+# Initialize an empty data frame to store results
+results <- data.frame(
+  File = character(),
+  n_alleles_1_FALSE = integer(),
+  n_alleles_1_TRUE = integer(),
+  Total_TRUE = integer(),
+  stringsAsFactors = FALSE
+)
+
+# Process all CSV files in the directory
+files <- list.files(input_dir, pattern = "\\.csv$", full.names = TRUE)
+for (file in files) {
+  # Read the CSV file
+  ctc <- read.csv(file)
+
+  # Compute alt_count
+  count_vec <- integer()
+  for (i in 1:nrow(ctc)) {
+    count_vec <- c(count_vec, ctc[i, paste0(ctc$Alt_Base[i], '_Count')])
+  }
+  ctc$alt_count <- count_vec
+
+  # Compute n_alleles
+  ctc$n_alleles <- rowSums(ctc[, grepl('Count', colnames(ctc))] > 0)
+
+  # Create the result table
+  result_table <- table(ctc$n_alleles, ctc$alt_count > 0)
+
+  # Extract the desired values
+  n_alleles_1_FALSE <- if ("1" %in% rownames(result_table) && "FALSE" %in% colnames(result_table)) result_table["1", "FALSE"] else 0
+  n_alleles_1_TRUE <- if ("1" %in% rownames(result_table) && "TRUE" %in% colnames(result_table)) result_table["1", "TRUE"] else 0
+  total_TRUE <- if ("TRUE" %in% colnames(result_table)) sum(result_table[, "TRUE"]) else 0
+
+  # Append the results
+  results <- rbind(
+    results,
+    data.frame(
+      File = basename(file),
+      n_alleles_1_FALSE = as.integer(n_alleles_1_FALSE),
+      n_alleles_1_TRUE = as.integer(n_alleles_1_TRUE),
+      Total_TRUE = as.integer(total_TRUE)
+    )
+  )
+}
+
+# Save the results to a CSV file
+write.csv(results, file = "/Users/ankit/Downloads/output_Sample12_results.csv", row.names = FALSE)
+
+# Print the results
+print(results)
+```
