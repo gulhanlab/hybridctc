@@ -20,17 +20,12 @@ Scripts for processing and analyzing DNA for HybridCTC cells
 5.	[ERIS] Once bed files are generated, transfer the de-duplicated BAMs and bed file to 02 for further processing. Need to generate id_rsa keys on 02 and save it in ERIS to enable file transfer from ERIS to 02: 
 ```scp -r ./04.rmdup ./06.bed ans4371@transfer.rc.hms.harvard.edu:/n/data1/hms/dbmi/gulhan/lab/DATA/CTC/HybridCTC/23April2025_B16F10_Round3_Lung_P1P2``` 
 Approve Duo prompt and transfer should begin. I create an interactive job and run this transfer in that interactive job. 
-6.	[02] Ginkgo: Navigate to dir: 
-```/n/data1/hms/dbmi/gulhan/lab/ankit/scripts``` 
-on 02. Run ginkgo using this command (example command for Ezgi’s Sample12): 
+6.	[02] Ginkgo: Run ginkgo using this command (example command for Ezgi’s Sample12): 
 ```./ginkgo_script.sh /n/data1/hms/dbmi/gulhan/lab/DATA/CTC/HybridCTC/23April2025_B16F10_Round3_Lung_P1P2``` 
 as an interactive job. The script uses bed files to run ginkgo. The parameter in the script should be path to the folder with sub-folder containing the bed files. Usually requires 3GB memory and 4-5 hrs to process. Request resources for interactive job accordingly.
-7.	[02] Avg depth and fraction of genome covered calculations: Navigate to dir: 
-```/n/data1/hms/dbmi/gulhan/lab/ankit/scripts``` 
-on 02. Modify the ‘depth.sh’ & ‘coverage.sh’ scripts to point to the correct input and output directories. Submit jobs to calculate depth and coverage using ‘sbatch depth.sh’ & ‘sbatch coverage.sh’ respectively. 
-8.	[02] Calculate mutation support: Navigate to dir: 
-```/n/data1/hms/dbmi/gulhan/lab/ankit/scripts/mutation_calling/HybridCTC``` 
-Run python scripts ‘CTC_new_mut.py’ & ‘WBC_new_mut.py’ to calculate CTC and WBC mutation support respectively. This will generate 2 files for each cell (CTC & WBC) with columns chr, position, Alt_Base,	Alt_Read_Support, Total_Reads, Fraction, A_Count, C_Count, T_Count, G_Count. 
+7.	[02] Avg depth and fraction of genome covered calculations. Modify the ‘depth.sh’ & ‘coverage.sh’ scripts to point to the correct input and output directories. Submit jobs to calculate depth and coverage using ```sbatch depth.sh``` & ```sbatch coverage.sh``` respectively. 
+8.	[02] Calculate mutation support: 
+Run python scripts ```./script/CTC_new_mut.py``` & ```./script/WBC_new_mut.py``` to calculate CTC and WBC mutation support respectively. This will generate 2 files for each cell (CTC & WBC) with columns chr, position, Alt_Base,	Alt_Read_Support, Total_Reads, Fraction, A_Count, C_Count, T_Count, G_Count. 
 9.	[Local] Calculate allele support and mutation fraction: Use R-script ‘muts.Rmd’ 1st code block to calculate CTC & WBC allele mutation fraction support. Calculate allele support raw numbers for CTC & WBC using 2nd  code block of ‘muts.Rmd’.
 10.	[Local] Scaled Plots: Plot scaled plots using ‘scale_blood.R’ script for CDP, CTC, and WBC for each cell. Fill metadata table with sample names before running this so the script knows the cells to plot and these cell names should match the names in SegNorm file obtained as output from the ginkgo run.
 
